@@ -49,6 +49,38 @@ def update_task(task_id):
 def delete_task(task_id):
     mongo.db.tasks.remove({"_id": ObjectId(task_id)})
     return redirect(url_for('get_tasks'))
+    
+@app.route('/get_categories')
+def get_categories():
+    return render_template('categories.html', categories=mongo.db.categories.find())
+    
+@app.route('/delete_category/<category_id>')
+def delete_category(category_id):
+    mongo.db.categories.remove({"_id": ObjectId(category_id)})
+    return redirect(url_for('get_categories'))
+
+@app.route('/insert_category', methods=['POST'])
+def insert_category():
+    categories = mongo.db.categories
+    categories.insert_one({'category_name': request.form.get('category_name')})
+    return redirect(url_for('get_categories'))
+    
+@app.route('/edit_category/<category_id>')
+def edit_category(category_id):
+    this_category = mongo.db.categories.find_one({"_id": ObjectId(category_id)})
+    return render_template('editcategory.html', category=this_category)
+    
+@app.route('/update_category/<category_id>', methods=['POST'])
+def update_category(category_id):
+    mongo.db.categories.update(
+        {'_id': ObjectId(category_id)},
+        {'category_name': request.form.get('category_name')}
+    )
+    return redirect(url_for('get_categories'))
+
+@app.route('/add_category')
+def add_category():
+    return render_template('addcategory.html')
 
 if __name__ == "__main__":
     app.run(host=os.environ.get("IP"),
